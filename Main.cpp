@@ -1,4 +1,5 @@
 #include <opencv2/core.hpp>
+#include <opencv2/opencv.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
@@ -6,7 +7,7 @@
 
 using namespace cv;
 
-namespace opencv {
+namespace drawing {
     cv::Mat readImage(const std::string& imagePath)
     {
         cv::Mat img = cv::imread(imagePath);
@@ -72,7 +73,7 @@ namespace opencv {
         if (vid.open(channel)) {
             while (vid.grab()) // grap = o anki frame'i alabiliyor muyuz?
             {
-                vid.retrieve(frame); // retrieve = videonun çýkýþ dizisini, Mat tipindeki deðere aktarma.
+                vid.retrieve(frame); // retrieve = videonun Ã§Ä±kÄ±ÅŸ dizisini, Mat tipindeki deÄŸere aktarma.
                 cv::imshow("Camera", frame);
                 cv::moveWindow("Camera", 250, 250);
                 if (cv::waitKey(23) == 27) { break; }
@@ -93,7 +94,7 @@ namespace opencv {
 
             while (vid.grab()) // grap = o anki frame'i alabiliyor muyuz?
             {
-                vid.retrieve(frame); // retrieve = videonun çýkýþ dizisini, Mat tipindeki deðere aktarma.
+                vid.retrieve(frame); // retrieve = videonun Ã§Ä±kÄ±ÅŸ dizisini, Mat tipindeki deÄŸere aktarma.
                 cv::imshow("Camera", frame);
                 if (cv::waitKey(23) == 27) { break; }
             }
@@ -104,42 +105,83 @@ namespace opencv {
     }
 
     void createSimpleImage(const int& height, const int& width, const int& blue, const int& green, const int& red) {
-        cv::Mat img(height, width, CV_8UC3); // CV_8UC3  = blue, green, red; 3 kanallý renk uzayý;
-        img = cv::Scalar(blue, green, red); // Scalar, resime renk vermek için kullanýlýr. blue-green-red -> min=0 max=255
+        cv::Mat img(height, width, CV_8UC3); // CV_8UC3  = blue, green, red; 3 kanallÄ± renk uzayÄ±;
+        img = cv::Scalar(blue, green, red); // Scalar, resime renk vermek iÃ§in kullanÄ±lÄ±r. blue-green-red -> min=0 max=255
 
 //      cv::Mat img(height, width, CV_8UC3, cv::Scalar(blue, green, red));
         cv::imshow("Simple Picture", img);
         cv::waitKey(0);
     }
 
-    void rectImage(const std::string& imagePath, const int& x, const int& y, const int& width, const int& height) {
+    void drawRectImage(const std::string& imagePath, const int& x, const int& y, const int& width, const int& height) {
         cv::Mat image = cv::imread(imagePath);
         cv::Mat newImage;
         image.copyTo(newImage);
         newImage = cv::Mat(newImage, cv::Rect(x, y, width, height));
-        cv::imshow("p", newImage);
+        cv::imshow("Image Window", newImage);
         cv::waitKey(0);
     }
 
-    void lineToImage(const std::string& imagePath, int x1, int y1, int x2, int y2, int blue, int green, int red, int thickness) {
+    void drawLineToImage(const std::string& imagePath, int x1, int y1, int x2, int y2, int blue, int green, int red, int thickness) {
         cv::Mat orgImage = cv::imread(imagePath);
         cv::Mat imageLined;
         orgImage.copyTo(imageLined);
         cv::line(imageLined, cv::Point(x1,y1), cv::Point(imageLined.cols/2,imageLined.rows/2), cv::Scalar(blue,green,red), thickness, 8, 0);
         cv::line(imageLined, cv::Point(imageLined.cols, y1), cv::Point(imageLined.cols / 2, imageLined.rows / 2), cv::Scalar(blue, green, red), thickness, 8, 0);
-        cv::imshow("Pencere", imageLined);
+        //imageLined.cols = resmin maximum kolon sayisini alir/ 1920
+        //imageLined.rows = resmin maximum satir sayisini alir/ 1080
+        cv::imshow("Line Window", imageLined);
+        cv::waitKey(0);
+    }
+    void drawRectangleToImagePoints(const std::string& imagePath, int x1, int y1, int x2, int y2, int blue, int green, int red, int thickness) {
+        cv::Mat orgImage = cv::imread(imagePath);
+        cv::Point start(x1, y1);
+        cv::Point finish(x2, y2);
+        cv::rectangle(orgImage, start, finish, cv::Scalar(blue, green, red), thickness, 8, 0);
+        cv::imshow("Rectangle Window", orgImage);
+        cv::waitKey(0);
+
+    }
+    void drawRectangleToImage(const std::string& imagePath, int x, int y, int width, int height, int blue, int green, int red, int thickness) {
+        cv::Mat orgImage = cv::imread(imagePath);
+        cv::rectangle(orgImage, cv::Rect(x,y, width, height), cv::Scalar(blue, green, red), thickness, 8, 0);
+        cv::imshow("Rectangle Window", orgImage);
+        cv::waitKey(0);
+    }
+    void drawWriteTextToImage(const std::string& imagePath, const std::string& text, int x, int y, double sizeofText, int thickness, bool mirror=false) {
+        cv::Mat orgImage = cv::imread(imagePath);
+        cv::Mat imageTexted;
+        orgImage.copyTo(imageTexted);
+        cv::Point location(x, y); // x-y noktalarimizi, yazinin sol alt kose olarak alir
+        cv::Point mirrorLocation(x, y+20);
+        cv::Scalar color(100, 0, 200); // blue green, red 
+        cv::putText(imageTexted, text, location, FONT_ITALIC, sizeofText, color, thickness, 8, mirror);
+        cv::putText(imageTexted, text, mirrorLocation, FONT_ITALIC, sizeofText, color, thickness, 8, !mirror);
+        cv::imshow("Write Window", imageTexted);
+        cv::waitKey(0);
+    }
+    void drawCircleToImage(const std::string& imagePath, int x, int y, int radius, int thickness=3) {
+        cv::Mat orgImage = cv::imread(imagePath);
+        cv::Point center(x, y);
+        cv::Scalar color(0, 255, 255);
+        cv::circle(orgImage, center, radius, color, thickness);
+        cv::imshow("Circle Window", orgImage);
         cv::waitKey(0);
     }
 }
 
 int main() {
-    std::string imageOrVideoPath = "C:/Users/kerem/Desktop/Albümler/beb/beb2.png";
-//  opencv::readImage(imageOrVideoPath);
-//  opencv::readVideo(imageOrVideoPath);
-//  opencv::readVideoFromWebcam(0); // 0 webcam belong to the pc
-//  opencv::createSimpleImage(900, 1600, 200, 150, 130);
-//  opencv::rectImage(imageOrVideoPath, 100, 300, 800, 350);
-//  opencv::lineToImage(imageOrVideoPath,0,0,350,150,0,255,255,3);
+    std::string imageOrVideoPath = "C:/Users/kerem/Desktop/AlbÃ¼mler/beb/beb2.png";
+//  drawing::readImage(imageOrVideoPath);
+//  drawing::readVideo(imageOrVideoPath);
+//  drawing::readVideoFromWebcam(0); // 0 webcam belong to the pc
+//  drawing::createSimpleImage(900, 1600, 200, 150, 130);
+//  drawing::drawRectImage(imageOrVideoPath, 100, 300, 800, 350);
+//  drawing::drawLineToImage(imageOrVideoPath,0,0,350,150,0,255,255,3);
+//  drawing::drawRectangleToImagePoints(imageOrVideoPath, 300, 350, 800, 670, 0, 255, 255, 2);
+//  drawing::drawRectangleToImage(imageOrVideoPath, 300, 350, 500, 320, 0, 255, 255, 2);
+//  drawing::drawWriteTextToImage(imageOrVideoPath, "TEXT", 400, 200,4.2,3);
+//  drawing::drawCircleToImage(imageOrVideoPath, 580, 490, 180);
 
     return 0;
 }
