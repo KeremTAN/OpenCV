@@ -3,9 +3,12 @@
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
+//#include<opencv2/highgui.hpp>
+//#include <opencv2/highgui/highgui.hpp>
 #include <iostream>
 
 using namespace cv;
+using namespace std;
 
 namespace drawing {
     cv::Mat readImage(const std::string& imagePath)
@@ -73,7 +76,7 @@ namespace drawing {
         if (vid.open(channel)) {
             while (vid.grab()) // grap = o anki frame'i alabiliyor muyuz?
             {
-                vid.retrieve(frame); // retrieve = videonun √ßƒ±kƒ±≈ü dizisini, Mat tipindeki deƒüere aktarma.
+                vid.retrieve(frame); // retrieve = videonun Á˝k˝˛ dizisini, Mat tipindeki deere aktarma.
                 cv::imshow("Camera", frame);
                 cv::moveWindow("Camera", 250, 250);
                 if (cv::waitKey(23) == 27) { break; }
@@ -94,7 +97,7 @@ namespace drawing {
 
             while (vid.grab()) // grap = o anki frame'i alabiliyor muyuz?
             {
-                vid.retrieve(frame); // retrieve = videonun √ßƒ±kƒ±≈ü dizisini, Mat tipindeki deƒüere aktarma.
+                vid.retrieve(frame); // retrieve = videonun Á˝k˝˛ dizisini, Mat tipindeki deere aktarma.
                 cv::imshow("Camera", frame);
                 if (cv::waitKey(23) == 27) { break; }
             }
@@ -105,8 +108,8 @@ namespace drawing {
     }
 
     void createSimpleImage(const int& height, const int& width, const int& blue, const int& green, const int& red) {
-        cv::Mat img(height, width, CV_8UC3); // CV_8UC3  = blue, green, red; 3 kanallƒ± renk uzayƒ±;
-        img = cv::Scalar(blue, green, red); // Scalar, resime renk vermek i√ßin kullanƒ±lƒ±r. blue-green-red -> min=0 max=255
+        cv::Mat img(height, width, CV_8UC3); // CV_8UC3  = blue, green, red; 3 kanall˝ renk uzay˝;
+        img = cv::Scalar(blue, green, red); // Scalar, resime renk vermek iÁin kullan˝l˝r. blue-green-red -> min=0 max=255
 
 //      cv::Mat img(height, width, CV_8UC3, cv::Scalar(blue, green, red));
         cv::imshow("Simple Picture", img);
@@ -170,8 +173,55 @@ namespace drawing {
     }
 }
 
+namespace matrix {
+
+    void readValuesOfImage(const std::string& imagePath) {
+        cv::Mat img = cv::imread(imagePath);
+        cv::Mat processingImg;
+        img.copyTo(processingImg);
+        uchar blue, green, red;
+        for (int x=0; x < img.cols; x++)
+        {
+            for (int y = 0; y < img.rows; y++)
+            {
+                blue = processingImg.at<cv::Vec3b>(cv::Point(x, y))[0];
+                if (blue < 255 && blue > 100) {
+                    blue = 80;
+                    processingImg.at<cv::Vec3b>(cv::Point(x, y))[0] = blue;
+                }
+                green = processingImg.at<cv::Vec3b>(cv::Point(x, y))[1];
+                if (green < 255 && green > 150) {
+                    green = 120;
+                    processingImg.at<cv::Vec3b>(cv::Point(x, y))[1] = green;
+                }
+            }
+        }
+        cv::imshow("Image", processingImg);
+        cv::waitKey(0);
+    }
+
+    void copyImg(const cv::Mat& img, cv::Mat& copyImage) {
+        copyImage = cv::Mat(cv::Size(img.cols, img.rows), CV_8UC3);
+        cv::Vec3b bgr;
+        cv::namedWindow("Image Copy Proccessing", cv::WINDOW_NORMAL);
+
+        for (int x = 0; x < img.cols; x++)
+        {
+            for (int y = 0; y < img.rows; y++)
+            {
+                bgr = img.at<cv::Vec3b>(cv::Point(x, y));
+                copyImage.at<cv::Vec3b>(cv::Point(x, y)) = bgr;
+
+                cv::imshow("Image Copy Proccessing", copyImage);
+                cv::waitKey(1);
+            }
+        }
+
+    }
+}
+
 int main() {
-    std::string imageOrVideoPath = "C:/Users/kerem/Desktop/Alb√ºmler/beb/beb2.png";
+    std::string imageOrVideoPath = "";
 //  drawing::readImage(imageOrVideoPath);
 //  drawing::readVideo(imageOrVideoPath);
 //  drawing::readVideoFromWebcam(0); // 0 webcam belong to the pc
@@ -182,6 +232,14 @@ int main() {
 //  drawing::drawRectangleToImage(imageOrVideoPath, 300, 350, 500, 320, 0, 255, 255, 2);
 //  drawing::drawWriteTextToImage(imageOrVideoPath, "TEXT", 400, 200,4.2,3);
 //  drawing::drawCircleToImage(imageOrVideoPath, 580, 490, 180);
+
+//  matrix::readValuesOfImage(imageOrVideoPath);
+/*
+    cv::Mat img = cv::imread(imageOrVideoPath);
+    cv::Mat copy;
+    matrix::copyImg(img, copy);
+*/
+
 
     return 0;
 }
