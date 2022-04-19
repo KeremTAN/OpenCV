@@ -216,8 +216,89 @@ namespace matrix {
                 cv::waitKey(1);
             }
         }
-
     }
+    void enlargeImage(const std::string& imagePath, const int& coefficientOfEnlarging=2){
+        cv::Mat img = cv::imread(imagePath);
+        int newWidth = img.cols * coefficientOfEnlarging;
+        int newHeigth = img.rows * coefficientOfEnlarging;
+        int xStart, yStart, xFinish, yFinish;
+        cv::Vec3b bgr;
+        cv::Mat newImg(cv::Size(newWidth, newHeigth), CV_8UC3);
+        for(int i=0; i<img.cols; i++){
+            for (int j = 0; j < img.rows; j++) {
+                bgr = img.at<cv::Vec3b>(cv::Point(i, j));
+                xStart = i * coefficientOfEnlarging;
+                yStart = j * coefficientOfEnlarging;
+                xFinish = xStart + coefficientOfEnlarging;
+                yFinish = yStart + coefficientOfEnlarging;
+                while(xStart<xFinish)
+                {
+                    while (yStart < yFinish) {
+                        newImg.at<cv::Vec3b>(cv::Point(xStart, yStart)) = bgr;
+                        yStart++;
+                    }
+                    xStart++;
+                }
+            }
+        }
+        cv::namedWindow("Enlarge Image", cv::WINDOW_NORMAL);
+        cv::imshow("Enlarge Image", newImg);
+        cv::waitKey(0);
+    }
+    void miniaturizeImage(const std::string& imagePath, const int& coefficientOfMiniaturize = 2) {
+        cv::Mat img = cv::imread(imagePath);
+        int width, height;
+        cv::Vec3b bgr;
+        if (img.data && !img.empty()) {
+            width = img.cols / coefficientOfMiniaturize;
+            height = img.rows / coefficientOfMiniaturize;
+            cv::Mat newImg(cv::Size(width, height), CV_8UC3);
+            for (int i = 0; i < width; i++) {
+                for (int j = 0; j < height; j++) {
+                    bgr = img.at<cv::Vec3b>(cv::Point(i * coefficientOfMiniaturize, j * coefficientOfMiniaturize));
+                    newImg.at<Vec3b>(cv::Point(i, j)) = bgr;
+                }
+            }
+            cv::namedWindow("Miniaturize Image", cv::WINDOW_NORMAL);
+            cv::imshow("Miniaturize Image", newImg);
+            cv::waitKey(0);
+        }
+    }
+
+    void blur(const std::string& imagePath, int degreeOfNghbrhd=1) {
+        cv::Mat img = cv::imread(imagePath);
+        cv::Mat blurImg = cv::Mat::zeros(cv::Size(img.cols, img.rows), CV_8UC3);
+        unsigned int b = 0, g = 0, r = 0, counter=0;
+
+        for (int x = 0; x < img.cols; x++) {
+            for (int y = 0; y < img.rows; y++) {
+                for (int xNghStart = x - degreeOfNghbrhd; xNghStart < x + degreeOfNghbrhd; xNghStart++) {
+                    for (int yNghStart = y - degreeOfNghbrhd; yNghStart < y + degreeOfNghbrhd; yNghStart++) {
+
+                        if (xNghStart >= 0 && yNghStart >= 0 && xNghStart < blurImg.cols && yNghStart < blurImg.rows) {
+                            b += (int)img.at<cv::Vec3b>(cv::Point(xNghStart, yNghStart))[0];
+                            g += (int)img.at<cv::Vec3b>(cv::Point(xNghStart, yNghStart))[1];
+                            r += (int)img.at<cv::Vec3b>(cv::Point(xNghStart, yNghStart))[2];
+                            counter++;
+                        }
+                    }
+                }
+                b /= counter;
+                g /= counter;
+                r /= counter;
+                blurImg.at<cv::Vec3b>(cv::Point(x, y))[0] = b;
+                blurImg.at<cv::Vec3b>(cv::Point(x, y))[1] = g;
+                blurImg.at<cv::Vec3b>(cv::Point(x, y))[2] = r;
+                b = 0; g = 0; r = 0; counter = 0;
+            }
+        }
+
+
+        cv::namedWindow("Blur Image", cv::WINDOW_NORMAL);
+        cv::imshow("Blur Image", blurImg);
+        cv::waitKey(0);
+    }
+
 }
 
 int main() {
@@ -239,7 +320,8 @@ int main() {
     cv::Mat copy;
     matrix::copyImg(img, copy);
 */
-
-
+//  matrix::enlargeImage(imageOrVideoPath, 2);
+//  matrix::miniaturizeImage(imageOrVideoPath, 3);
+//    matrix::blur(imageOrVideoPath, 8);
     return 0;
 }
