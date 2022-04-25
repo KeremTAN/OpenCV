@@ -294,13 +294,26 @@ namespace matrix {
         }
 
 
-        cv::namedWindow("Blur Image", cv::WINDOW_NORMAL);
+        cv::namedWindow("Blur Image", cv::WINDOW_GUI_NORMAL);
         cv::imshow("Blur Image", blurImg);
         cv::waitKey(0);
     }
 
 }
 
+void mouseClick(int event, int x, int y, int flag, void* data) {
+    if(event==cv::EVENT_LBUTTONDOWN){}
+    else if (event == cv::EVENT_LBUTTONUP){}
+    else if(event == cv::EVENT_MOUSEWHEEL){}
+    else if (event == cv::EVENT_MOUSEMOVE){}
+}
+void mouseEvents(){
+    cv::Mat img = cv::Mat::zeros(cv::Size(640, 480), CV_8UC3);
+    cv::imshow("Paint", img);
+    //mouse click event
+    cv::setMouseCallback("Paint", mouseClick);
+    cv::waitKey(0);
+}
 int main() {
     std::string imageOrVideoPath = "";
 //  drawing::readImage(imageOrVideoPath);
@@ -322,6 +335,7 @@ int main() {
 */
 //  matrix::enlargeImage(imageOrVideoPath, 2);
 //  matrix::miniaturizeImage(imageOrVideoPath, 3);
-//    matrix::blur(imageOrVideoPath, 8);
+//  matrix::blur(imageOrVideoPath, 8);
+    mouseEvents();
     return 0;
 }
