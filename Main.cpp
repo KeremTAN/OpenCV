@@ -3,7 +3,6 @@
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
-//#include<opencv2/highgui.hpp>
 //#include <opencv2/highgui/highgui.hpp>
 #include <iostream>
 
@@ -301,18 +300,75 @@ namespace matrix {
 
 }
 
-void mouseClick(int event, int x, int y, int flag, void* data) {
-    if(event==cv::EVENT_LBUTTONDOWN){}
-    else if (event == cv::EVENT_LBUTTONUP){}
-    else if(event == cv::EVENT_MOUSEWHEEL){}
-    else if (event == cv::EVENT_MOUSEMOVE){}
-}
-void mouseEvents(){
-    cv::Mat img = cv::Mat::zeros(cv::Size(640, 480), CV_8UC3);
-    cv::imshow("Paint", img);
-    //mouse click event
-    cv::setMouseCallback("Paint", mouseClick);
-    cv::waitKey(0);
+namespace painting {
+    struct ImageData {
+    private:
+        cv::Vec3b color= cv::Vec3b(255,0,0);
+        int colorCounter=0;
+    public:
+        cv::Mat img;
+        string windowName = "Paint";
+        bool isDrawable = false;
+
+        void increaseColor() {
+            colorCounter++;
+            if (colorCounter == 4)
+                colorCounter = 0;
+        }
+        void decreaseColor() {
+            colorCounter--;
+            if (colorCounter == -1)
+                colorCounter = 3;
+        }
+
+        cv::Vec3b getColor() {
+            switch (colorCounter)
+            {
+            case 0:
+                return color = cv::Vec3b(255, 0, 0);
+                break;
+            case 1:
+                return color = cv::Vec3b(0, 255, 0);
+                break;
+            case 2:
+                return color = cv::Vec3b(0, 0, 255);
+                break;
+            case 3:
+                return color = cv::Vec3b(128, 128, 128);
+                break;
+            default:
+                break;
+            }
+        }
+
+    };
+    void mouseEvent(int event, int x, int y, int flag, void* data) {
+        auto* d = (ImageData*)data;
+        if (event == cv::EVENT_LBUTTONDOWN) {
+            d->isDrawable = true;
+        }
+        else if (event == cv::EVENT_LBUTTONUP) {
+            d->isDrawable = false;
+        }
+
+        else if (event == cv::EVENT_RBUTTONUP) {
+            d->increaseColor();
+        }
+        if (d->isDrawable) {
+            d->img.at<cv::Vec3b>(cv::Point(x, y)) = d->getColor();
+            cv::imshow(d->windowName, d->img);
+        }
+    }
+
+    void paintByMaouse() {
+        ImageData data;
+        data.img = cv::Mat::zeros(cv::Size(640, 480), CV_8UC3);
+        cv::imshow(data.windowName, data.img);
+
+        //mouse click event
+        cv::setMouseCallback(data.windowName, mouseEvent, &data);
+        cv::waitKey(0);
+    }
 }
 int main() {
     std::string imageOrVideoPath = "";
@@ -336,6 +392,6 @@ int main() {
 //  matrix::enlargeImage(imageOrVideoPath, 2);
 //  matrix::miniaturizeImage(imageOrVideoPath, 3);
 //  matrix::blur(imageOrVideoPath, 8);
-    mouseEvents();
+    painting::paintByMaouse();
     return 0;
 }
